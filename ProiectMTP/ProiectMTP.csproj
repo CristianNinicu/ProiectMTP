@@ -29,7 +29,16 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+    <PackageReference Include="OpenAI" Version="1.0.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Views\Client\Create.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Client\Delete.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Client\Details.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Client\Edit.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Client\Index.cshtml" />
   </ItemGroup>
 
 </Project>

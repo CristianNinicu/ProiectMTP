@@ -6,7 +6,9 @@
     using Microsoft.AspNetCore.Authentication.Cookies;
     using System.Security.Claims;
     using ProiectMTP.Models;
+    using Microsoft.AspNetCore.Authorization;
 
+    [Authorize]
     public class AccountController : Controller
     {
         private readonly string xmlPath;

@@ -1,4 +1,4 @@
-﻿@model List<string>
+@model List<string>
 @{
     var tableName = ViewBag.TableName as string;
 }
@@ -61,16 +61,31 @@
 <form asp-action="AddColumn" method="post">
     <input type="hidden" name="tableName" value="@tableName" />
 
-    <div class="form-group">
-        <label>Nume coloană:</label>
+    <div class="mb-3">
+        <label class="form-label">Nume coloană:</label>
         <input type="text" name="columnName" class="form-control" required />
     </div>
-    <div class="form-group">
-        <label>Tip coloană (ex: VARCHAR(100), INT):</label>
-        <input type="text" name="columnType" class="form-control" required />
+
+    <div class="mb-3">
+        <label class="form-label">Tip coloană:</label>
+        <select name="columnType" class="form-select" required>
+            <option value="" disabled selected>Alege un tip...</option>
+            <option value="INT">INT</option>
+            <option value="BIGINT">BIGINT</option>
+            <option value="VARCHAR(50)">VARCHAR(50)</option>
+            <option value="VARCHAR(100)">VARCHAR(100)</option>
+            <option value="TEXT">TEXT</option>
+            <option value="DATE">DATE</option>
+            <option value="DATETIME">DATETIME</option>
+            <option value="DECIMAL(10,2)">DECIMAL(10,2)</option>
+            <option value="FLOAT">FLOAT</option>
+            <option value="BIT">BIT</option>
+            <!-- Extinde cu alte opțiuni, dacă e nevoie -->
+        </select>
     </div>
-    <br />
+
     <button type="submit" class="btn btn-primary">Adaugă coloană</button>
+    <a asp-action="Index" class="btn btn-secondary">Înapoi</a>
 </form>
 
 <a href="/Home/Index" class="btn btn-secondary mt-3">⏪ Înapoi</a>
