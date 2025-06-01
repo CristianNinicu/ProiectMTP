@@ -9,6 +9,7 @@
     using Microsoft.AspNetCore.Authorization;
 
     [Authorize]
+    [AllowAnonymous]
     public class AccountController : Controller
     {
         private readonly string xmlPath;
