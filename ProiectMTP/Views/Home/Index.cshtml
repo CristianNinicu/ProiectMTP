@@ -1,0 +1,39 @@
+﻿@model List<string>
+
+<h2>📋 Tabele existente</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<ul>
+    @foreach (var table in Model)
+    {
+        <li>@table</li>
+    }
+</ul>
+
+<ul>
+    @foreach (var table in Model)
+    {
+        <li>
+            @table |
+            <a href="/Home/EditTable?tableName=@table" class="btn btn-sm btn-outline-primary">Editează coloane</a>
+        </li>
+    }
+</ul>
+
+<hr />
+
+<h3>➕ Creează un tabel nou</h3>
+<form asp-action="CreateTable" method="post">
+    <label>Nume tabel:</label>
+    <input type="text" name="tableName" class="form-control" required />
+    <br />
+    <button type="submit" class="btn btn-primary">Creează tabel</button>
+</form>

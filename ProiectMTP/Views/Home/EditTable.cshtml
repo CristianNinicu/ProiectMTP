@@ -1,0 +1,76 @@
+﻿@model List<string>
+@{
+    var tableName = ViewBag.TableName as string;
+}
+
+<h2>🛠️ Editare structură tabel: @tableName</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Nume coloană</th>
+            <th>Acțiune</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var col in Model)
+        {
+            <tr>
+                <td>@col</td>
+                <td>
+                    @if (col != "Id")
+                    {
+                        <form asp-action="DeleteColumn" method="post" style="display:inline;">
+                            <input type="hidden" name="tableName" value="@tableName" />
+                            <input type="hidden" name="columnName" value="@col" />
+                            <button type="submit" class="btn btn-danger btn-sm">Șterge</button>
+                        </form>
+
+                        <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#rename-@col">Redenumește</button>
+
+                        <div class="collapse mt-2" id="rename-@col">
+                            <form asp-action="RenameColumn" method="post">
+                                <input type="hidden" name="tableName" value="@tableName" />
+                                <input type="hidden" name="oldColumnName" value="@col" />
+
+                                <input type="text" name="newColumnName" placeholder="Nume nou" required class="form-control mb-1" />
+                                <input type="text" name="newColumnType" placeholder="Tip nou (ex: VARCHAR(100))" required class="form-control mb-1" />
+
+                                <button type="submit" class="btn btn-sm btn-success">Salvează</button>
+                            </form>
+                        </div>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+
+<h4>➕ Adaugă coloană nouă</h4>
+<form asp-action="AddColumn" method="post">
+    <input type="hidden" name="tableName" value="@tableName" />
+
+    <div class="form-group">
+        <label>Nume coloană:</label>
+        <input type="text" name="columnName" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label>Tip coloană (ex: VARCHAR(100), INT):</label>
+        <input type="text" name="columnType" class="form-control" required />
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">Adaugă coloană</button>
+</form>
+
+<a href="/Home/Index" class="btn btn-secondary mt-3">⏪ Înapoi</a>
