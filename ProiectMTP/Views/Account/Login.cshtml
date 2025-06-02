@@ -1,22 +1,37 @@
 ﻿@{
     ViewData["Title"] = "Login";
+    var returnUrl = ViewData["ReturnUrl"] as string;
 }
 
-<h2>Autentificare</h2>
+<div class="container" style="max-width: 450px; margin-top: 50px;">
+    <h2 class="mb-4">Autentificare</h2>
 
-<form method="post">
-    <div>
-        <label>Username</label>
-        <input type="text" name="username" required />
-    </div>
-    <div>
-        <label>Password</label>
-        <input type="password" name="password" required />
-    </div>
-    <button type="submit">Login</button>
-</form>
+    @* Dacă există un mesaj de eroare în ViewBag, îl afișăm *@
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Message"]
+        </div>
+    }
 
-@if (ViewBag.Message != null)
-{
-    <p style="color:red">@ViewBag.Message</p>
+    <form asp-action="Login" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+        <div class="mb-3">
+            <label class="form-label" for="username">Username</label>
+            <input type="text" name="username" id="username" class="form-control" required autofocus />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="password">Password</label>
+            <input type="password" name="password" id="password" class="form-control" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Loghează-te</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }

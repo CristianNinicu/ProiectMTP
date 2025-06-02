@@ -18,46 +18,80 @@
         {
             xmlPath = Path.Combine(Directory.GetCurrentDirectory(), "users.xml");
         }
+        
         [HttpGet]
-        public IActionResult Login()
+        [AllowAnonymous]
+        public IActionResult Login(string returnUrl = null)
         {
+            ViewBag.Message = TempData["Message"];
+            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string username, string password)
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(string username, string password, string returnUrl = null)
         {
-            var users = XDocument.Load(xmlPath).Root.Elements("User")
-                .Select(x => new User
-                {
-                    Username = x.Element("Username")?.Value,
-                    Password = x.Element("Password")?.Value
-                }).ToList();
+            ViewData["ReturnUrl"] = returnUrl;
 
-            var user = users.FirstOrDefault(u => u.Username == username && u.Password == password);
+            if (!System.IO.File.Exists(xmlPath))
+            {
+                TempData["Message"] = "Fișierul de utilizatori nu a fost găsit.";
+                return RedirectToAction("Login");
+            }
 
+            var usersXml = XDocument.Load(xmlPath)
+                                     .Root
+                                     .Elements("User")
+                                     .Select(x => new User
+                                     {
+                                         Username = x.Element("Username")?.Value,
+                                         Password = x.Element("Password")?.Value
+                                     })
+                                     .ToList();
+
+            var user = usersXml.FirstOrDefault(u => u.Username == username && u.Password == password);
             if (user != null)
             {
                 var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.Username)
-            };
+                {
+                    new Claim(ClaimTypes.Name, user.Username)
+                };
 
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(identity));
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30)
+                };
 
-                return RedirectToAction("Index", "Home");
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties);
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
             }
 
-            ViewBag.Message = "Autentificare eșuată";
-            return View();
+            TempData["Message"] = "Autentificare eșuată: username/parolă incorecte.";
+            return RedirectToAction("Login");
         }
 
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login");
         }
     }

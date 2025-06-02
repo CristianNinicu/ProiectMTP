@@ -23,14 +23,6 @@
       "RelativeMoniker": "D:0:0:{71FF817B-478A-40FB-BBDF-F20A7B5BB003}|ProiectMTP\\ProiectMTP.csproj|solutionrelative:proiectmtp\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{71FF817B-478A-40FB-BBDF-F20A7B5BB003}|ProiectMTP\\ProiectMTP.csproj|c:\\users\\cristian\\source\\repos\\proiectmtp\\proiectmtp\\controllers\\clientcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{71FF817B-478A-40FB-BBDF-F20A7B5BB003}|ProiectMTP\\ProiectMTP.csproj|solutionrelative:proiectmtp\\controllers\\clientcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{71FF817B-478A-40FB-BBDF-F20A7B5BB003}|ProiectMTP\\ProiectMTP.csproj|c:\\users\\cristian\\source\\repos\\proiectmtp\\proiectmtp\\models\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{71FF817B-478A-40FB-BBDF-F20A7B5BB003}|ProiectMTP\\ProiectMTP.csproj|solutionrelative:proiectmtp\\models\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{71FF817B-478A-40FB-BBDF-F20A7B5BB003}|ProiectMTP\\ProiectMTP.csproj|c:\\users\\cristian\\source\\repos\\proiectmtp\\proiectmtp\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{71FF817B-478A-40FB-BBDF-F20A7B5BB003}|ProiectMTP\\ProiectMTP.csproj|solutionrelative:proiectmtp\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -41,10 +33,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{71FF817B-478A-40FB-BBDF-F20A7B5BB003}|ProiectMTP\\ProiectMTP.csproj|c:\\users\\cristian\\source\\repos\\proiectmtp\\proiectmtp\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{71FF817B-478A-40FB-BBDF-F20A7B5BB003}|ProiectMTP\\ProiectMTP.csproj|solutionrelative:proiectmtp\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{71FF817B-478A-40FB-BBDF-F20A7B5BB003}|ProiectMTP\\ProiectMTP.csproj|c:\\users\\cristian\\source\\repos\\proiectmtp\\proiectmtp\\views\\client\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{71FF817B-478A-40FB-BBDF-F20A7B5BB003}|ProiectMTP\\ProiectMTP.csproj|solutionrelative:proiectmtp\\views\\client\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{71FF817B-478A-40FB-BBDF-F20A7B5BB003}|ProiectMTP\\ProiectMTP.csproj|c:\\users\\cristian\\source\\repos\\proiectmtp\\proiectmtp\\users.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
@@ -85,6 +73,18 @@
     {
       "AbsoluteMoniker": "D:0:0:{71FF817B-478A-40FB-BBDF-F20A7B5BB003}|ProiectMTP\\ProiectMTP.csproj|c:\\users\\cristian\\source\\repos\\proiectmtp\\proiectmtp\\wwwroot\\js\\site.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{71FF817B-478A-40FB-BBDF-F20A7B5BB003}|ProiectMTP\\ProiectMTP.csproj|solutionrelative:proiectmtp\\wwwroot\\js\\site.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Controllers\\ClientController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ProiectMTP\\Controllers\\ClientController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Models\\Client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ProiectMTP\\Models\\Client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Views\\Client\\Index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ProiectMTP\\Views\\Client\\Index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -110,8 +110,7 @@
               "RelativeToolTip": "ProiectMTP\\Controllers\\HomeController.cs",
               "ViewState": "AgIAAGEAAAAAAAAAAAAAwJYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-14T08:47:13.461Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-14T08:47:13.461Z"
             },
             {
               "$type": "Document",
@@ -128,7 +127,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 18,
               "Title": "ClientController.cs",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Controllers\\ClientController.cs",
               "RelativeDocumentMoniker": "ProiectMTP\\Controllers\\ClientController.cs",
@@ -136,12 +135,11 @@
               "RelativeToolTip": "ProiectMTP\\Controllers\\ClientController.cs",
               "ViewState": "AgIAAG8AAAAAAAAAAAAAwIQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-31T16:17:12.676Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-31T16:17:12.676Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 5,
               "Title": "AccountController.cs",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Controllers\\AccountController.cs",
               "RelativeDocumentMoniker": "ProiectMTP\\Controllers\\AccountController.cs",
@@ -149,8 +147,7 @@
               "RelativeToolTip": "ProiectMTP\\Controllers\\AccountController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-31T09:27:55.947Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-31T09:27:55.947Z"
             },
             {
               "$type": "Document",
@@ -162,8 +159,7 @@
               "RelativeToolTip": "ProiectMTP\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-05-14T08:48:32.487Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-14T08:48:32.487Z"
             },
             {
               "$type": "Document",
@@ -175,12 +171,11 @@
               "RelativeToolTip": "ProiectMTP\\Program.cs",
               "ViewState": "AgIAAAwAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-14T08:40:50.161Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-14T08:40:50.161Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 19,
               "Title": "Client.cs",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Models\\Client.cs",
               "RelativeDocumentMoniker": "ProiectMTP\\Models\\Client.cs",
@@ -188,8 +183,7 @@
               "RelativeToolTip": "ProiectMTP\\Models\\Client.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-14T09:04:42.916Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-14T09:04:42.916Z"
             },
             {
               "$type": "Document",
@@ -201,12 +195,11 @@
               "RelativeToolTip": "ProiectMTP\\Views\\Home\\Index.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-05-31T09:31:35.738Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-31T09:31:35.738Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 7,
               "Title": "ApplicationDbContext.cs",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Data\\ApplicationDbContext.cs",
               "RelativeDocumentMoniker": "ProiectMTP\\Data\\ApplicationDbContext.cs",
@@ -218,7 +211,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 6,
               "Title": "Login.cshtml",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Views\\Account\\Login.cshtml",
               "RelativeDocumentMoniker": "ProiectMTP\\Views\\Account\\Login.cshtml",
@@ -230,7 +223,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 20,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Views\\Client\\Index.cshtml",
               "RelativeDocumentMoniker": "ProiectMTP\\Views\\Client\\Index.cshtml",
@@ -242,7 +235,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 8,
               "Title": "users.xml",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\users.xml",
               "RelativeDocumentMoniker": "ProiectMTP\\users.xml",
@@ -254,7 +247,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 10,
               "Title": "UserModel.cs",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Models\\UserModel.cs",
               "RelativeDocumentMoniker": "ProiectMTP\\Models\\UserModel.cs",
@@ -266,7 +259,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 9,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\appsettings.Development.json",
               "RelativeDocumentMoniker": "ProiectMTP\\appsettings.Development.json",
@@ -278,7 +271,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 11,
               "Title": "launchSettings.json",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Properties\\launchSettings.json",
               "RelativeDocumentMoniker": "ProiectMTP\\Properties\\launchSettings.json",
@@ -290,7 +283,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 12,
               "Title": "ApplicationDbContextFactory.cs",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Data\\ApplicationDbContextFactory.cs",
               "RelativeDocumentMoniker": "ProiectMTP\\Data\\ApplicationDbContextFactory.cs",
@@ -302,7 +295,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 13,
               "Title": "ErrorViewModel.cs",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Models\\ErrorViewModel.cs",
               "RelativeDocumentMoniker": "ProiectMTP\\Models\\ErrorViewModel.cs",
@@ -314,7 +307,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 14,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "ProiectMTP\\Views\\Shared\\_Layout.cshtml",
@@ -326,7 +319,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 15,
               "Title": "_ViewImports.cshtml",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Views\\_ViewImports.cshtml",
               "RelativeDocumentMoniker": "ProiectMTP\\Views\\_ViewImports.cshtml",
@@ -338,7 +331,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 16,
               "Title": "_ViewStart.cshtml",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\Views\\_ViewStart.cshtml",
               "RelativeDocumentMoniker": "ProiectMTP\\Views\\_ViewStart.cshtml",
@@ -350,7 +343,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 17,
               "Title": "site.js",
               "DocumentMoniker": "C:\\Users\\Cristian\\source\\repos\\ProiectMTP\\ProiectMTP\\wwwroot\\js\\site.js",
               "RelativeDocumentMoniker": "ProiectMTP\\wwwroot\\js\\site.js",
