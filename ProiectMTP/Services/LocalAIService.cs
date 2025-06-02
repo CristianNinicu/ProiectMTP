@@ -1,6 +1,12 @@
-﻿using LMKit.Model;                // pentru LM și DeviceConfiguration
-using LMKit.TextGeneration;       // pentru MultiTurnConversation și TextGenerationResult
-using LMKit.Licensing;            // pentru LicenseManager
+﻿using System.Runtime.ExceptionServices;
+using System.Security;
+using LMKit.Model; // pentru LM și DeviceConfiguration
+using LMKit.TextGeneration; // pentru MultiTurnConversation și TextGenerationResult
+using LMKit.Licensing;
+using LMKit;
+using LM = LMKit.Model.LM;
+using MultiTurnConversation = LMKit.TextGeneration.MultiTurnConversation;
+using TextGenerationResult = LMKit.TextGeneration.TextGenerationResult;
 using System.Text;
 
 namespace ProiectMTP.Services
@@ -15,10 +21,10 @@ namespace ProiectMTP.Services
 
     public class LocalAIService : IAIService, IDisposable
     {
-        private readonly LM                   _model;    // Încarcă modelul GGUF
-        private readonly MultiTurnConversation _chat;    // Sesiunea de chat (multi-turn)
-        private readonly object                _lock = new object();
-        private bool                           _disposed = false;
+        private readonly LM _model; // Încarcă modelul GGUF
+        private readonly MultiTurnConversation _chat; // Sesiunea de chat (multi-turn)
+        private readonly object _lock = new object();
+        private bool _disposed = false;
 
         public LocalAIService(IConfiguration configuration)
         {
@@ -40,12 +46,15 @@ namespace ProiectMTP.Services
                 //    Astfel LM-Kit va rula inferența doar pe CPU, fără Vulkan/CUDA.
                 var deviceConfig = new LM.DeviceConfiguration
                 {
-                    GpuLayerCount = 0
+                    GpuLayerCount = 0,
                 };
+                LMKit.Global.Runtime.LogLevel = LMKit.Global.Runtime.LMKitLogLevel.Information;
+                LMKit.Global.Runtime.Initialize();
 
                 // 3) Încarcă efectiv modelul în memorie și creează sesiunea de chat
                 _model = new LM(modelPath, deviceConfig);
-                _chat  = new MultiTurnConversation(_model);
+                var contextSize = 512;
+                _chat = new MultiTurnConversation(_model, contextSize: _model.ContextLength);
             }
             catch (Exception ex)
             {
@@ -53,6 +62,7 @@ namespace ProiectMTP.Services
             }
         }
 
+        [HandleProcessCorruptedStateExceptions]
         public async Task<string> GenerateAsync(string prompt)
         {
             if (_disposed)
@@ -71,20 +81,23 @@ namespace ProiectMTP.Services
 
                     try
                     {
-                        // 4) Construim prompt-ul foarte explicit pentru cod SQL
                         var fullPrompt = new StringBuilder();
-                        fullPrompt.AppendLine("You are a helpful assistant. ONLY output the SQL statement, without any extra explanation or commentary.");
-                        fullPrompt.AppendLine($"User instruction (Romanian): \"{prompt}\"");
-                        fullPrompt.AppendLine();
-                        fullPrompt.Append("Respond with a valid MariaDB CREATE TABLE statement, starting exactly with \"CREATE TABLE\" and ending with a semicolon. Do NOT include any leading or trailing text.");
+                        fullPrompt.AppendLine("You are a helpful assistant that outputs valid MySQL statements (no comments, no explanations).");
+                        fullPrompt.Append("User instruction (Romanian): \"");
+                        fullPrompt.Append(prompt);
+                        fullPrompt.AppendLine("\"");
 
-                        // 5) Trimite prompt-ul la LM-Kit și obține răspunsul
-                        TextGenerationResult result = _chat.Submit(fullPrompt.ToString());
-                        var generated = result.Completion?.Trim() ?? string.Empty;
+                        // 8) Trimitem prompt-ul în sesiunea de chat și primim un TextGenerationResult
+                        var generationResult = _chat.Submit(fullPrompt.ToString());
 
-                        // 6) Extrage doar substring-ul valid de la ultima apariție a "CREATE TABLE"
-                        var cleanSql = CleanGeneratedText(generated);
-                        return cleanSql;
+                        // 9) Extragem textul generat (proprietatea GeneratedText)
+                        var text = generationResult.Completion?.Trim() ?? string.Empty;
+
+                        // 10) Dacă lipsește punctul și virgula la final, îl adăugăm
+                        if (!string.IsNullOrEmpty(text) && !text.EndsWith(";"))
+                            text += ";";
+                        var final = CleanGeneratedText(text);
+                        return final;
                     }
                     catch (Exception ex)
                     {
@@ -162,22 +175,20 @@ namespace ProiectMTP.Services
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed && disposing)
+            if (_disposed || !disposing) return;
+            try
             {
-                try
+                lock (_lock)
                 {
-                    lock (_lock)
-                    {
-                        _chat?.Dispose();
-                        _model?.Dispose();
-                        _disposed = true;
-                    }
+                    _chat?.Dispose();
+                    _model?.Dispose();
+                    _disposed = true;
                 }
-                catch (Exception ex)
-                {
-                    // Logare minimă a erorii la disposal
-                    Console.WriteLine($"Eroare la disposal: {ex.Message}");
-                }
+            }
+            catch (Exception ex)
+            {
+                // Logare minimă a erorii la disposal
+                Console.WriteLine($"Eroare la disposal: {ex.Message}");
             }
         }
 

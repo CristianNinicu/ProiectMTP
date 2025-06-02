@@ -1,12 +1,11 @@
 ﻿@model object
-@using System.Text
 @{
     ViewData["Title"] = "Import CSV";
-    // Dropdown-ul cu lista de tabele
+    // Dropdown-ul cu lista de tabele existente (pentru import în tabel existent)
     var tableNames = ViewBag.TableNames as List<string> ?? new List<string>();
 }
 
-<h1 class="mb-4">Import CSV în tabelă</h1>
+<h1 class="mb-4">Import CSV</h1>
 
 <div class="row">
     <div class="col-md-8">
@@ -22,9 +21,28 @@
 
         <form asp-action="ImportCsv" method="post" enctype="multipart/form-data" id="csvForm">
             @Html.AntiForgeryToken()
+
+            <!-- 1. Alegerea între tabel existent și tabel nou -->
             <div class="mb-3">
+                <label class="form-label"><strong>1. Alege unde să importezi CSV-ul:</strong></label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="importMode" id="modeExisting" value="existing" checked>
+                    <label class="form-check-label" for="modeExisting">
+                        Import într-un tabel <strong>existent</strong>
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="importMode" id="modeNew" value="new">
+                    <label class="form-check-label" for="modeNew">
+                        <strong>Creează un tabel nou</strong> pe baza antetului CSV
+                    </label>
+                </div>
+            </div>
+
+            <!-- 2a. Dacă e tabel existent, afişează dropdown cu tabele -->
+            <div class="mb-3" id="existingTableDiv">
                 <label for="tableName" class="form-label">Selectează tabela țintă:</label>
-                <select class="form-select" id="tableName" name="tableName" required>
+                <select class="form-select" id="tableName" name="tableName">
                     <option value="" disabled selected>-- Alege tabelă --</option>
                     @foreach (var t in tableNames)
                     {
@@ -33,6 +51,16 @@
                 </select>
             </div>
 
+            <!-- 2b. Dacă e tabel nou, arată câmp text pentru nume tabel -->
+            <div class="mb-3 d-none" id="newTableDiv">
+                <label for="newTableName" class="form-label">Nume tabel nou:</label>
+                <input type="text" class="form-control" id="newTableName" name="newTableName" placeholder="Introdu numele pentru noua tabelă">
+                <div class="form-text">
+                    Tabelul va fi creat cu toate coloanele din antetul CSV (toate de tip VARCHAR(255)).
+                </div>
+            </div>
+
+            <!-- 3. Zona drag & drop pentru fișier CSV -->
             <div class="mb-3">
                 <label class="form-label">Încarcă fișier CSV (drag & drop sau click)</label>
                 <div id="drop-zone"
@@ -57,16 +85,39 @@
 
 @section Scripts {
     <script>
-        // Obținem referințe către elemente
+        // --------------- LOGICA PENTRU SELECTAREA MODULUI (existent / nou) ---------------
+        const modeExisting = document.getElementById('modeExisting');
+        const modeNew = document.getElementById('modeNew');
+        const existingTableDiv = document.getElementById('existingTableDiv');
+        const newTableDiv = document.getElementById('newTableDiv');
+
+        function toggleTableSelection() {
+            if (modeExisting.checked) {
+                existingTableDiv.classList.remove('d-none');
+                newTableDiv.classList.add('d-none');
+            } else {
+                existingTableDiv.classList.add('d-none');
+                newTableDiv.classList.remove('d-none');
+            }
+        }
+
+        modeExisting.addEventListener('change', toggleTableSelection);
+        modeNew.addEventListener('change', toggleTableSelection);
+
+        // Rulesc o dată la încărcarea paginii
+        toggleTableSelection();
+
+
+        // --------------- DRAG & DROP / SELECT FILE ----------------
         const dropZone = document.getElementById('drop-zone');
         const csvFileInput = document.getElementById('csvFile');
 
-        // Când dăm click în zona drop, declanșăm click pe <input type="file">
+        // Click pe zona drop declanșează click pe input
         dropZone.addEventListener('click', () => {
             csvFileInput.click();
         });
 
-        // Când selectăm manual un fișier, punem numele fișierului în interior(în drop-zone)
+        // La schimbare (file selectat manual), afișăm numele fișierului
         csvFileInput.addEventListener('change', () => {
             if (csvFileInput.files.length > 0) {
                 const fileName = csvFileInput.files[0].name;
@@ -83,7 +134,7 @@
             dropZone.classList.add('bg-light');
         });
 
-        // Când părăsim zona drop
+        // Când ieșim din zona drop
         dropZone.addEventListener('dragleave', () => {
             dropZone.classList.remove('bg-light');
         });
@@ -95,9 +146,7 @@
 
             if (e.dataTransfer.files.length > 0) {
                 const file = e.dataTransfer.files[0];
-                // Validăm extensia
                 if (file.name.toLowerCase().endsWith('.csv')) {
-                    // Creăm un DataTransfer temporar pentru a popula <input type="file">
                     const dt = new DataTransfer();
                     dt.items.add(file);
                     csvFileInput.files = dt.files;
@@ -113,3 +162,4 @@
         });
     </script>
 }
+

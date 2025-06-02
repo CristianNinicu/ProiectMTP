@@ -275,50 +275,64 @@ namespace ProiectMTP.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ImportCsv(string tableName, IFormFile csvFile)
+        public async Task<IActionResult> ImportCsv(string importMode, string tableName, string newTableName, IFormFile csvFile)
         {
-            // Validări de bază:
-            if (string.IsNullOrWhiteSpace(tableName))
+            // importMode: "existing" sau "new"
+            // tableName: numele tabelului existent (dacă importMode == "existing")
+            // newTableName: numele tabelului nou (dacă importMode == "new")
+            // csvFile: fișierul .csv încărcat
+
+            // 1. Validează alegerea modului:
+            bool isNewTable = string.Equals(importMode, "new", StringComparison.OrdinalIgnoreCase);
+
+            if (isNewTable)
             {
-                TempData["Error"] = "Nu ai selectat niciun tabel.";
-                return RedirectToAction(nameof(ImportCsv));
+                // Trebuie să avem un nume valid pentru noul tabel
+                if (string.IsNullOrWhiteSpace(newTableName))
+                {
+                    TempData["Error"] = "Trebuie să specifici un nume pentru noul tabel.";
+                    return RedirectToAction(nameof(ImportCsv));
+                }
+                // Milităm să nu existe deja un tabel cu același nume în baza de date
+                var connStrCheck = _configuration.GetConnectionString("MariaDbConnection");
+                using (var connCheck = new MySqlConnection(connStrCheck))
+                {
+                    connCheck.Open();
+                    using (var cmdCheck = new MySqlCommand("SHOW TABLES LIKE @t;", connCheck))
+                    {
+                        cmdCheck.Parameters.AddWithValue("@t", newTableName);
+                        var exists = cmdCheck.ExecuteScalar();
+                        if (exists != null)
+                        {
+                            TempData["Error"] = $"Există deja o tabelă numită '{newTableName}'. Alege un alt nume.";
+                            return RedirectToAction(nameof(ImportCsv));
+                        }
+                    }
+                }
+
+                // Vom folosi newTableName pe post de tableName de aici încolo
+                tableName = newTableName;
             }
+            else
+            {
+                // Dacă e modul existent, trebuie să avem tableName ne-gol
+                if (string.IsNullOrWhiteSpace(tableName))
+                {
+                    TempData["Error"] = "Nu ai selectat niciun tabel existent.";
+                    return RedirectToAction(nameof(ImportCsv));
+                }
+            }
+
+            // 2. Fișierul CSV validations
             if (csvFile == null || csvFile.Length == 0)
             {
                 TempData["Error"] = "Nu ai încărcat niciun fișier CSV.";
                 return RedirectToAction(nameof(ImportCsv));
             }
 
-            var connStr = _configuration.GetConnectionString("MariaDbConnection");
-            // 1) citim schema tabelului (nume+tip coloane) într-o listă de ColumnInfo
-            var columnsWithTypes = new List<ColumnInfo>();
-
-            using (var conn = new MySqlConnection(connStr))
-            {
-                conn.Open();
-                using (var colCmd = new MySqlCommand($"SHOW COLUMNS FROM `{tableName}`;", conn))
-                using (var colReader = colCmd.ExecuteReader())
-                {
-                    while (colReader.Read())
-                    {
-                        columnsWithTypes.Add(new ColumnInfo
-                        {
-                            Name = colReader.GetString("Field"),
-                            Type = colReader.GetString("Type")
-                        });
-                    }
-                }
-            }
-
-            if (columnsWithTypes.Count == 0)
-            {
-                TempData["Error"] = $"Tabelul '{tableName}' nu are coloane sau nu există.";
-                return RedirectToAction(nameof(ImportCsv));
-            }
-
-            // 2) Folosim CsvHelper pentru a parsa CSV-ul. Vom presupune că antetul fișierului conține numele coloanelor
-            //    în aceeași formă (exact) cu Field-urile din SHOW COLUMNS. Dacă antetul nu se potrivește, vom da eroare.
+            // 3. Parsăm CSV cu CsvHelper într-un buffer temporar
             List<Dictionary<string, string>> records = new List<Dictionary<string, string>>();
+            string[] headerRow;
             try
             {
                 using (var reader = new StreamReader(csvFile.OpenReadStream(), Encoding.UTF8))
@@ -329,29 +343,58 @@ namespace ProiectMTP.Controllers
                     IgnoreBlankLines = true
                 }))
                 {
-                    // Citim toate înregistrările într-un buffer de gen: Dictionary<colName, value>
                     await csv.ReadAsync();
                     csv.ReadHeader();
-                    var headerRow = csv.HeaderRecord; // array de stringuri cu antetul
-                    // Validăm că fiecare nume din antet apare în schema tabelului
-                    var schemaNames = columnsWithTypes.Select(c => c.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
-                    foreach (var h in headerRow)
+                    headerRow = csv.HeaderRecord; // array cu numele coloanelor din CSV
+
+                    // 3.a) Dacă modul este "new", creăm tabelul în baza de date acum, folosind headerRow
+                    if (isNewTable)
                     {
-                        if (!schemaNames.Contains(h))
+                        // Construim comanda CREATE TABLE
+                        // Vom pune toate coloanele ca VARCHAR(255). Poți schimba logica dacă vrei TEXT sau alte tipuri.
+                        var createSb = new StringBuilder();
+                        createSb.AppendLine($"CREATE TABLE `{tableName}` (");
+                        createSb.AppendLine("  `id` INT(11) NOT NULL AUTO_INCREMENT,"); // cheie primară
+                        for (int i = 0; i < headerRow.Length; i++)
                         {
-                            TempData["Error"] = $"Coloana '{h}' din antetul CSV nu există în tabela '{tableName}'.";
-                            return RedirectToAction(nameof(ImportCsv));
+                            var col = headerRow[i].Trim();
+                            // Sanitizare minimă: nu permitem spații, slash-uri, etc
+                            // Într-o versiune product-ready ai face o validare mai avansată
+                            if (string.IsNullOrWhiteSpace(col) || col.Any(c => char.IsWhiteSpace(c)))
+                            {
+                                throw new Exception($"Nume coloană invalid în antet: '{col}'");
+                            }
+                            // Adaugă coloana
+                            createSb.Append($"  `{col}` VARCHAR(255) NULL");
+                            if (i < headerRow.Length - 1)
+                                createSb.AppendLine(",");
+                            else
+                                createSb.AppendLine();
                         }
+                        createSb.AppendLine("  , PRIMARY KEY (`id`)");
+                        createSb.AppendLine(") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+                        // Executăm CREATE TABLE
+                        var connStrCreate = _configuration.GetConnectionString("MariaDbConnection");
+                        using (var connCreate = new MySqlConnection(connStrCreate))
+                        {
+                            await connCreate.OpenAsync();
+                            using (var cmdCreate = new MySqlCommand(createSb.ToString(), connCreate))
+                            {
+                                await cmdCreate.ExecuteNonQueryAsync();
+                            }
+                        }
+                        // Tabelul a fost creat. Continuăm importul în el.
                     }
 
-                    // Citim rândurile
+                    // 3.b) Indiferent de modul (new sau existing), citim rândurile CSV în memoria aplicației
                     while (await csv.ReadAsync())
                     {
                         var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                         foreach (var h in headerRow)
                         {
                             var val = csv.GetField(h);
-                            dict[h] = val;
+                            dict[h] = val ?? string.Empty;
                         }
                         records.Add(dict);
                     }
@@ -359,7 +402,7 @@ namespace ProiectMTP.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Eroare la parsarea fișierului CSV: {ex.Message}";
+                TempData["Error"] = $"Eroare la parsarea fișierului CSV sau la crearea tabelului: {ex.Message}";
                 return RedirectToAction(nameof(ImportCsv));
             }
 
@@ -369,33 +412,30 @@ namespace ProiectMTP.Controllers
                 return RedirectToAction(nameof(ImportCsv));
             }
 
-            // 3) Construim și executăm INSERT-urile în baza de date (folosind tranzacție)
+            // 4. Pregătim INSERT-urile într-o tranzacție
             try
             {
+                var connStr = _configuration.GetConnectionString("MariaDbConnection");
                 using (var conn = new MySqlConnection(connStr))
                 {
-                    conn.Open();
+                    await conn.OpenAsync();
                     using (var transaction = await conn.BeginTransactionAsync())
                     {
-                        // Vom lua antetul din primul rând (dict.Keys) pentru a crea comanda INSERT
-                        var headers = records[0].Keys.ToList(); // lista de coloane de inserat
-                        var columnList = string.Join(", ", headers.Select(h => $"`{h}`"));
-                        var paramList = string.Join(", ", headers.Select(h => $"@{h}"));
-
+                        // Folosim headerRow ca listă de coloane pentru INSERT
+                        var columnList = string.Join(", ", headerRow.Select(h => $"`{h}`"));
+                        var paramList = string.Join(", ", headerRow.Select(h => $"@{h}"));
                         var insertSql = $"INSERT INTO `{tableName}` ({columnList}) VALUES ({paramList});";
 
                         foreach (var rowDict in records)
                         {
                             using (var cmd = new MySqlCommand(insertSql, conn, transaction))
                             {
-                                // adăugăm parametrii pentru fiecare coloană
-                                foreach (var h in headers)
+                                foreach (var h in headerRow)
                                 {
                                     // Dacă valoarea e vidă, trimitem DBNull
                                     object val = string.IsNullOrWhiteSpace(rowDict[h])
                                         ? (object)DBNull.Value
                                         : rowDict[h];
-
                                     cmd.Parameters.AddWithValue($"@{h}", val);
                                 }
                                 await cmd.ExecuteNonQueryAsync();
@@ -405,7 +445,6 @@ namespace ProiectMTP.Controllers
                         await transaction.CommitAsync();
                     }
                 }
-
                 TempData["Success"] = $"Au fost importate {records.Count} rânduri în tabela '{tableName}'.";
             }
             catch (Exception ex)
@@ -415,6 +454,5 @@ namespace ProiectMTP.Controllers
 
             return RedirectToAction(nameof(ImportCsv));
         }
-    
     }
 }
