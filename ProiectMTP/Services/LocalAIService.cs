@@ -3,7 +3,6 @@ using LMKit.TextGeneration;       // pentru MultiTurnConversation și TextGenera
 using LMKit.Licensing;            // pentru LicenseManager
 using System.Text;
 
-
 namespace ProiectMTP.Services
 {
     public interface IAIService
@@ -16,8 +15,8 @@ namespace ProiectMTP.Services
 
     public class LocalAIService : IAIService, IDisposable
     {
-        private readonly LM                   _model;    // încarcă modelul GGUF
-        private readonly MultiTurnConversation _chat;    // sesiunea de chat
+        private readonly LM                   _model;    // Încarcă modelul GGUF
+        private readonly MultiTurnConversation _chat;    // Sesiunea de chat (multi-turn)
         private readonly object                _lock = new object();
         private bool                           _disposed = false;
 
@@ -25,8 +24,8 @@ namespace ProiectMTP.Services
         {
             try
             {
-                // 0) Înregistrează cheia de licență LM-Kit (community sau comercială)
-                //    Înlocuiește cu cheia ta de pe https://lm-kit.com/products/community-edition/
+                // 0) Înregistrează cheia de licență LM-Kit (Community sau comercială)
+                //    Înlocuiește cu cheia ta obținută de pe: https://lm-kit.com/products/community-edition/
                 // LicenseManager.SetLicenseKey("YOUR_COMMUNITY_LICENSE_KEY");
 
                 // 1) Obține calea către fișierul GGUF din appsettings.json
@@ -37,13 +36,14 @@ namespace ProiectMTP.Services
                 if (!File.Exists(modelPath))
                     throw new FileNotFoundException($"Modelul GGUF nu a fost găsit la calea: {modelPath}");
 
-                // 2) Configurează DeviceConfiguration cu GpuLayerCount = 0 → CPU-only
+                // 2) Configurare CPU-only: GpuLayerCount = 0
+                //    Astfel LM-Kit va rula inferența doar pe CPU, fără Vulkan/CUDA.
                 var deviceConfig = new LM.DeviceConfiguration
                 {
-                    GpuLayerCount = 0   // forțează LM-Kit să ruleze tot pe CPU
+                    GpuLayerCount = 0
                 };
 
-                // 3) Încarcă modelul în memorie și creează sesiunea de chat
+                // 3) Încarcă efectiv modelul în memorie și creează sesiunea de chat
                 _model = new LM(modelPath, deviceConfig);
                 _chat  = new MultiTurnConversation(_model);
             }
@@ -78,12 +78,11 @@ namespace ProiectMTP.Services
                         fullPrompt.AppendLine();
                         fullPrompt.Append("Respond with a valid MariaDB CREATE TABLE statement, starting exactly with \"CREATE TABLE\" and ending with a semicolon. Do NOT include any leading or trailing text.");
 
-                        // 5) Trimitem prompt-ul către sesiunea de chat și obținem rezultatul
+                        // 5) Trimite prompt-ul la LM-Kit și obține răspunsul
                         TextGenerationResult result = _chat.Submit(fullPrompt.ToString());
                         var generated = result.Completion?.Trim() ?? string.Empty;
 
-
-                        // 6) Extragem doar substring-ul care începe cu "CREATE TABLE" și se încheie cu ";"
+                        // 6) Extrage doar substring-ul valid de la ultima apariție a "CREATE TABLE"
                         var cleanSql = CleanGeneratedText(generated);
                         return cleanSql;
                     }
@@ -96,15 +95,17 @@ namespace ProiectMTP.Services
         }
 
         /// <summary>
-        /// Elimină textul care apare înainte de "CREATE TABLE" și extrage numai instrucțiunea SQL completă
-        /// (de la "CREATE TABLE" până la primul semicolon), curățând eventualele comentarii și spații multiple.
+        /// În cazul în care modelul adaugă text explicativ înainte de "CREATE TABLE",
+        /// această metodă va găsi ULTIMA apariție a "CREATE TABLE" și va returna
+        /// substring-ul de la acel punct până la primul semicolon.
         /// </summary>
         private string CleanGeneratedText(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
                 return string.Empty;
 
-            // 1) Spargem pe linii și excludem liniile de comentarii SQL
+            // 1) Spargem pe linii și excludem liniile care par comentarii SQL
+            //    (încep cu --, /*, *). Apoi le re-unim într-un singur șir:
             var lines = text
                 .Split('\n', StringSplitOptions.RemoveEmptyEntries)
                 .Where(line =>
@@ -115,27 +116,27 @@ namespace ProiectMTP.Services
                 .Select(line => line.Trim())
                 .ToArray();
 
-            // 2) Reunim într-un singur șir și eliminăm spațiile la început/ sfârșit
+            // 2) Unim toate liniile într-un singur șir, eliminând spațiile de la capete
             var collapsed = string.Join(" ", lines).Trim();
 
-            // 3) Găsim indexul primei apariții a cuvântului "CREATE TABLE" (insensibil la majuscule)
+            // 3) Căutăm **ultima** apariție a șirului "CREATE TABLE" (insensibil la majuscule)
             var keyword = "CREATE TABLE";
-            var idx = collapsed.IndexOf(keyword, StringComparison.OrdinalIgnoreCase);
+            var idx = collapsed.LastIndexOf(keyword, StringComparison.OrdinalIgnoreCase);
             if (idx >= 0)
             {
-                // 4) Extragem tot începând de la "CREATE TABLE"
+                // 4) Extragem substring-ul începând de la "CREATE TABLE"
                 var after = collapsed.Substring(idx);
 
-                // 5) Găsim poziția primului semicolon
+                // 5) Găsim primul semicolon
                 var semiIdx = after.IndexOf(';');
                 if (semiIdx >= 0)
                 {
-                    // Returnăm substring-ul cu tot cu semicolon
+                    // Returnăm substring-ul de la "CREATE TABLE" și până la semicolon inclus
                     return after.Substring(0, semiIdx + 1).Trim();
                 }
                 else
                 {
-                    // Dacă nu găsim ";", întoarcem tot textul rămas și adăugăm un semicolon
+                    // Dacă nu există ';', adăugăm unul la final
                     var candidate = after.Trim();
                     if (!candidate.EndsWith(";"))
                         candidate += ";";
@@ -143,7 +144,8 @@ namespace ProiectMTP.Services
                 }
             }
 
-            // 6) Dacă nu găsim "CREATE TABLE", trimitem tot șirul, cu un semicolon la final (fallback)
+            // 6) Dacă nu am găsit niciun "CREATE TABLE", trimitem tot textul (fallback),
+            //    cu un semicolon la final (dacă lipsește).
             var cleaned = collapsed;
             while (cleaned.Contains("  "))
                 cleaned = cleaned.Replace("  ", " ");
@@ -173,6 +175,7 @@ namespace ProiectMTP.Services
                 }
                 catch (Exception ex)
                 {
+                    // Logare minimă a erorii la disposal
                     Console.WriteLine($"Eroare la disposal: {ex.Message}");
                 }
             }
