@@ -454,5 +454,131 @@ namespace ProiectMTP.Controllers
 
             return RedirectToAction(nameof(ImportCsv));
         }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PreviewInsert(string tableName, int rowsToGenerate = 0)
+        {
+            if (string.IsNullOrWhiteSpace(tableName))
+            {
+                TempData["Error"] = "Nu ai specificat niciun tabel.";
+                return RedirectToAction("Details", new { tableName });
+            }
+
+            if (rowsToGenerate <= 0)
+            {
+                rowsToGenerate = _defaultRowsToGenerate;
+            }
+
+            // 1) Construim o listă de coloane preluată cu SHOW COLUMNS
+            var columnNames = new List<string>();
+            var connStr = _configuration.GetConnectionString("MariaDbConnection");
+
+            try
+            {
+                using (var conn = new MySqlConnection(connStr))
+                {
+                    await conn.OpenAsync();
+                    using (var cmd = new MySqlCommand($"SHOW COLUMNS FROM `{tableName}`;", conn))
+                    using (var rdr = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await rdr.ReadAsync())
+                        {
+                            // Coloana "Field" conține numele câmpului
+                            columnNames.Add(rdr.GetString("Field"));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Dacă nu putem citi coloanele, revenim la Details cu mesaj de eroare
+                TempData["Error"] = $"Nu s-au putut citi coloanele tabelului '{tableName}': {ex.Message}";
+                return RedirectToAction("Details", new { tableName });
+            }
+
+            if (columnNames.Count == 0)
+            {
+                TempData["Error"] = $"Tabelul '{tableName}' nu are coloane sau nu există.";
+                return RedirectToAction("Details", new { tableName });
+            }
+
+            // 2) Construim prompt-ul incluzând explicit lista de coloane
+            //    Exemplu: "Generează 5 rânduri INSERT pentru tabela `evenimente` în MariaDB,
+            //               folosind coloanele (id, titlu, descriere, data_inceput). Fără alte explicații."
+            var columnsList = string.Join(", ", columnNames);
+            var promptBuilder = new StringBuilder();
+            promptBuilder.AppendLine($"Generează {rowsToGenerate} rânduri INSERT pentru tabela `{tableName}` în MariaDB,");
+            promptBuilder.AppendLine($"folosind coloanele ({columnsList}).");
+            promptBuilder.Append("Fără alte explicații, doar comenzile INSERT.");
+
+            string generatedScript;
+            try
+            {
+                generatedScript = await _aiService.GenerateAsync(promptBuilder.ToString());
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Eroare la generarea scriptului: {ex.Message}";
+                return RedirectToAction("Details", new { tableName });
+            }
+
+            // 3) Populăm ViewModel-ul și afișăm view-ul PreviewInsert
+            var viewModel = new SqlScriptViewModel
+            {
+                TableName = tableName,
+                GeneratedScript = generatedScript
+            };
+
+            return View("PreviewInsert", viewModel);
+        }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ExecuteInsert(SqlScriptViewModel model)
+    {
+        if (model == null || string.IsNullOrWhiteSpace(model.TableName))
+        {
+            ModelState.AddModelError("", "Nu există tabel specificat.");
+            return View("PreviewInsert", model);
+        }
+        if (string.IsNullOrWhiteSpace(model.GeneratedScript))
+        {
+            ModelState.AddModelError("", "Scriptul SQL este gol.");
+            return View("PreviewInsert", model);
+        }
+
+        var connStr = _configuration.GetConnectionString("MariaDbConnection");
+        try
+        {
+            using (var conn = new MySqlConnection(connStr))
+            {
+                await conn.OpenAsync();
+                var commands = model.GeneratedScript
+                    .Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+                using (var transaction = await conn.BeginTransactionAsync())
+                {
+                    foreach (var cmdText in commands)
+                    {
+                        var line = cmdText.Trim();
+                        if (string.IsNullOrEmpty(line)) continue;
+                        using (var cmd = new MySqlCommand(line + ";", conn, transaction))
+                        {
+                            await cmd.ExecuteNonQueryAsync();
+                        }
+                    }
+                    await transaction.CommitAsync();
+                }
+            }
+            model.SuccessMessage = $"Scriptul a fost executat cu succes în tabela „{model.TableName}”.";
+        }
+        catch (Exception ex)
+        {
+            model.ErrorMessage = $"Eroare la execuție: {ex.Message}";
+        }
+
+        return View("PreviewInsert", model);
+    }
     }
 }
