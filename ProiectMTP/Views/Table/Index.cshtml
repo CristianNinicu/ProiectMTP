@@ -1,0 +1,28 @@
+﻿@model List<string>
+@{
+    ViewData["Title"] = "Lista tabelelor";
+}
+
+<h1>Lista tabelelor din baza de date</h1>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th scope="col">Nume tabel</th>
+        <th scope="col">Acțiune</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var table in Model)
+    {
+        <tr>
+            <td>@table</td>
+            <td>
+                <a asp-action="Details" asp-route-tableName="@table" class="btn btn-sm btn-primary">
+                    Vezi date
+                </a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,91 +1,76 @@
-@model List<string>
+@model List<ProiectMTP.Models.ColumnInfo>
 @{
+    ViewData["Title"] = "Editare structură tabel: " + (ViewBag.TableName as string);
     var tableName = ViewBag.TableName as string;
+    var columnsWithTypes = Model ?? new List<ProiectMTP.Models.ColumnInfo>();
 }
 
-<h2>🛠️ Editare structură tabel: @tableName</h2>
+<h1 class="my-4">
+    <i class="bi bi-tools"></i> Editare structură tabel: 
+    <em>@tableName</em>
+</h1>
 
-@if (TempData["Success"] != null)
+@if (columnsWithTypes.Count == 0)
 {
-    <div class="alert alert-success">@TempData["Success"]</div>
+    <p class="text-muted">Nu s-au putut citi coloanele pentru tabelul „@tableName”.</p>
 }
-@if (TempData["Error"] != null)
+else
 {
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Nume coloană</th>
-            <th>Acțiune</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var col in Model)
-        {
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
             <tr>
-                <td>@col</td>
-                <td>
-                    @if (col != "Id")
-                    {
-                        <form asp-action="DeleteColumn" method="post" style="display:inline;">
-                            <input type="hidden" name="tableName" value="@tableName" />
-                            <input type="hidden" name="columnName" value="@col" />
-                            <button type="submit" class="btn btn-danger btn-sm">Șterge</button>
-                        </form>
-
-                        <button class="btn btn-sm btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#rename-@col">Redenumește</button>
-
-                        <div class="collapse mt-2" id="rename-@col">
-                            <form asp-action="RenameColumn" method="post">
-                                <input type="hidden" name="tableName" value="@tableName" />
-                                <input type="hidden" name="oldColumnName" value="@col" />
-
-                                <input type="text" name="newColumnName" placeholder="Nume nou" required class="form-control mb-1" />
-                                <input type="text" name="newColumnType" placeholder="Tip nou (ex: VARCHAR(100))" required class="form-control mb-1" />
-
-                                <button type="submit" class="btn btn-sm btn-success">Salvează</button>
-                            </form>
-                        </div>
-                    }
-                </td>
+                <th scope="col">Nume coloană</th>
+                <th scope="col">Tip coloană</th>
+                <th scope="col">Acțiune</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var ci in columnsWithTypes)
+            {
+                <tr>
+                    <td>@ci.Name</td>
+                    <td>@ci.Type</td>
+                    <td>
+                        <form asp-action="DropColumn" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="tableName" value="@tableName" />
+                            <input type="hidden" name="columnName" value="@ci.Name" />
+                            <button type="submit" class="btn btn-sm btn-danger">Șterge</button>
+                        </form>
+                        &nbsp;
+                        <a asp-action="RenameColumn" asp-route-tableName="@tableName" asp-route-columnName="@ci.Name"
+                           class="btn btn-sm btn-secondary">Redenumește</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 <hr />
 
-<h4>➕ Adaugă coloană nouă</h4>
-<form asp-action="AddColumn" method="post">
+<h3 class="mt-4"><i class="bi bi-plus-lg"></i> Adaugă coloană nouă</h3>
+<form asp-action="AddColumn" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
     <input type="hidden" name="tableName" value="@tableName" />
-
-    <div class="mb-3">
-        <label class="form-label">Nume coloană:</label>
-        <input type="text" name="columnName" class="form-control" required />
+    <div class="col-md-6">
+        <label for="newColumnName" class="form-label">Nume coloană:</label>
+        <input type="text" class="form-control" id="newColumnName" name="newColumnName" required />
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Tip coloană:</label>
-        <select name="columnType" class="form-select" required>
-            <option value="" disabled selected>Alege un tip...</option>
+    <div class="col-md-6">
+        <label for="newColumnType" class="form-label">Tip coloană:</label>
+        <select class="form-select" id="newColumnType" name="newColumnType" required>
+            <option value="" selected disabled>Alege un tip...</option>
             <option value="INT">INT</option>
-            <option value="BIGINT">BIGINT</option>
             <option value="VARCHAR(50)">VARCHAR(50)</option>
             <option value="VARCHAR(100)">VARCHAR(100)</option>
-            <option value="TEXT">TEXT</option>
             <option value="DATE">DATE</option>
-            <option value="DATETIME">DATETIME</option>
-            <option value="DECIMAL(10,2)">DECIMAL(10,2)</option>
-            <option value="FLOAT">FLOAT</option>
-            <option value="BIT">BIT</option>
-            <!-- Extinde cu alte opțiuni, dacă e nevoie -->
+            <option value="TEXT">TEXT</option>
+            <!-- Adăugați cât mai multe tipuri doriți -->
         </select>
     </div>
-
-    <button type="submit" class="btn btn-primary">Adaugă coloană</button>
-    <a asp-action="Index" class="btn btn-secondary">Înapoi</a>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Adaugă coloană</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Înapoi</a>
+    </div>
 </form>
-
-<a href="/Home/Index" class="btn btn-secondary mt-3">⏪ Înapoi</a>

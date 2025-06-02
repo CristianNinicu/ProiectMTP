@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using ProiectMTP.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
@@ -134,30 +134,34 @@ namespace ProiectMTP.Controllers
         public IActionResult EditTable(string tableName)
         {
             if (string.IsNullOrWhiteSpace(tableName))
-            {
-                TempData["Error"] = "Nu a fost specificat niciun tabel.";
-                return RedirectToAction("Index");
-            }
+                return BadRequest("Nu a fost specificat numele tabelului.");
 
-            var columns = new List<string>();
-            string connectionString = _configuration.GetConnectionString("MariaDbConnection");
+            var connStr = _configuration.GetConnectionString("MariaDbConnection");
+            var columnsWithTypes = new List<ColumnInfo>();
 
-            using (var connection = new MySqlConnection(connectionString))
+            using (var conn = new MySqlConnection(connStr))
             {
-                connection.Open();
-                string query = $"SHOW COLUMNS FROM `{tableName}`;";
-                using (var cmd = new MySqlCommand(query, connection))
-                using (var reader = cmd.ExecuteReader())
+                conn.Open();
+
+                // Preluăm schema completă (Field + Type) pentru a afișa în view
+                using (var colCmd = new MySqlCommand($"SHOW COLUMNS FROM `{tableName}`;", conn))
+                using (var colReader = colCmd.ExecuteReader())
                 {
-                    while (reader.Read())
+                    while (colReader.Read())
                     {
-                        columns.Add(reader.GetString("Field"));
+                        var fieldName = colReader.GetString("Field");
+                        var fieldType = colReader.GetString("Type");
+                        columnsWithTypes.Add(new ColumnInfo
+                        {
+                            Name = fieldName,
+                            Type = fieldType
+                        });
                     }
                 }
             }
 
             ViewBag.TableName = tableName;
-            return View(columns);
+            return View(columnsWithTypes);
         }
 
         // =====================================

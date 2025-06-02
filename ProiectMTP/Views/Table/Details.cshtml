@@ -1,0 +1,120 @@
+﻿@model System.Data.DataTable
+@using System.Data
+@using ProiectMTP.Models  @* Pentru ColumnInfo *@
+@{
+    ViewData["Title"] = "Detalii tabel";
+    var tableName = ViewBag.TableName as string;
+    var columnsWithTypes = ViewBag.ColumnsWithTypes as List<ColumnInfo>;
+    var defaultRowsToGenerate = (int)ViewBag.DefaultRowsToGenerate;
+
+    // Dacă ColumnsWithTypes nu există în ViewBag (ar fi null), inițializăm o listă goală
+    if (columnsWithTypes == null)
+    {
+        columnsWithTypes = new List<ColumnInfo>();
+    }
+}
+
+<h1>Detalii pentru tabelul „@tableName”</h1>
+
+<a asp-action="Index" class="btn btn-secondary mb-3">
+    ← Înapoi la lista tabelelor
+</a>
+
+<hr />
+
+<div class="mb-4">
+    <h3>Coloane în „@tableName”:</h3>
+    @if (!string.IsNullOrEmpty(ViewBag.Error as string))
+    {
+        <div class="alert alert-danger">
+            @ViewBag.Error
+        </div>
+    }
+    else if (columnsWithTypes.Count == 0)
+    {
+        <p class="text-muted">Nu s-au putut citi coloanele sau tabelul este gol.</p>
+    }
+    else
+    {
+        <ul class="list-unstyled">
+            @foreach (var ci in columnsWithTypes)
+            {
+                <li>
+                    <strong>@ci.Name</strong>
+                    (<em>@ci.Type</em>)
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+<div class="mb-4">
+    <h3>Date actuale (primele 10 rânduri):</h3>
+    @if (Model == null || Model.Rows.Count == 0)
+    {
+        <p class="text-muted">Nu există rânduri în tabel sau datele nu au putut fi încărcate.</p>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table class="table table-bordered table-sm">
+                <thead class="table-light">
+                    <tr>
+                        @foreach (DataColumn dc in Model.Columns)
+                        {
+                            <th>@dc.ColumnName</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (DataRow row in Model.Rows)
+                    {
+                        <tr>
+                            @foreach (var item in row.ItemArray)
+                            {
+                                <td>@item</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<hr />
+
+<div class="mb-4">
+    <h3>Generează rânduri noi cu AI</h3>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["Error"]
+        </div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            @TempData["Success"]
+        </div>
+    }
+    <form asp-action="GenerateRows" method="post" class="row g-3 align-items-end">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="tableName" value="@tableName" />
+        <div class="col-auto">
+            <label for="rowsToGenerate" class="form-label">Număr de rânduri de generat:</label>
+            <input type="number"
+                   class="form-control"
+                   id="rowsToGenerate"
+                   name="rowsToGenerate"
+                   value="@defaultRowsToGenerate"
+                   min="1"
+                   max="100" />
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">
+                Generează și inserează
+            </button>
+        </div>
+    </form>
+</div>

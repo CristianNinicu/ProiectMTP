@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="LlamaSharp" Version="0.2.2" />
     <PackageReference Include="LLamaSharp.Backend.Cpu" Version="0.2.2" />
     <PackageReference Include="LM-Kit.NET" Version="2025.3.1" />
