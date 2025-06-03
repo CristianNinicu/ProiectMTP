@@ -1,6 +1,5 @@
 ﻿@model System.Data.DataTable
 @using System.Data
-@using ProiectMTP.Models
 @{
     ViewData["Title"] = "Detalii tabel";
     var tableName = ViewBag.TableName as string;
@@ -25,7 +24,7 @@
 }
 else
 {
-    <p class="text-muted">Nu s-au putut citi coloanele sau tabelul este gol.</p>
+    <p class="text-muted">Tabel gol sau imposibil de citit.</p>
 }
 
 <hr />
@@ -57,14 +56,13 @@ else
 }
 else
 {
-    <p class="text-muted">Nu există rânduri în tabel sau datele nu au putut fi încărcate.</p>
+    <p class="text-muted">Fără date de afișat.</p>
 }
 
 <hr />
 
 <h2>Generează rânduri noi cu AI</h2>
 
-@* Dacă există o eroare încărcată în TempData["Error"], o afișăm *@
 @if (TempData["Error"] != null)
 {
     <div class="alert alert-danger">@TempData["Error"]</div>
@@ -72,8 +70,6 @@ else
 
 <form asp-action="PreviewInsert" method="post" class="row g-3 align-items-center">
     @Html.AntiForgeryToken()
-
-    @* Important: transmitem tableName ca input ascuns *@
     <input type="hidden" name="tableName" value="@tableName" />
 
     <div class="col-auto">

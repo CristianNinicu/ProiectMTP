@@ -8,34 +8,33 @@
 
 <div class="row">
     <div class="col-md-10">
-        @* Afișăm mesajul de eroare, dacă există *@
         @if (!string.IsNullOrEmpty(Model.ErrorMessage))
         {
             <div class="alert alert-danger">@Model.ErrorMessage</div>
         }
-        @* Afișăm mesajul de succes, dacă există *@
         @if (!string.IsNullOrEmpty(Model.SuccessMessage))
         {
             <div class="alert alert-success">@Model.SuccessMessage</div>
         }
 
-        @* Formularul pentru a edita și executa scriptul generat *@
         <form asp-action="ExecuteInsert" method="post">
             @Html.AntiForgeryToken()
-
             <input type="hidden" asp-for="TableName" />
 
             <div class="mb-3">
                 <label asp-for="GeneratedScript" class="form-label">Script SQL generat:</label>
-                <textarea class="form-control" asp-for="GeneratedScript" rows="10"
-                          style="font-family: 'Courier New', Courier, monospace;"></textarea>
+                <textarea class="form-control"
+                          asp-for="GeneratedScript"
+                          rows="10"
+                          style="font-family: 'Courier New', Courier, monospace;">
+                </textarea>
                 <span asp-validation-for="GeneratedScript" class="text-danger"></span>
             </div>
 
             <button type="submit" class="btn btn-primary">Execută scriptul</button>
-            <a asp-action="Details" asp-route-tableName="@Model.TableName" class="btn btn-secondary ms-2">
-                ← Înapoi la Detalii Tabel
-            </a>
+            <a asp-action="Details"
+               asp-route-tableName="@Model.TableName"
+               class="btn btn-secondary ms-2">← Înapoi la Detalii Tabel</a>
         </form>
     </div>
 </div>
