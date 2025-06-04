@@ -44,10 +44,10 @@ namespace ProiectMTP.Controllers
 
             // 1) Construiește un prompt instruct clar pentru modelul de bază
             var fullPrompt = $@"
-You are an assistant that generates valid SQL for MariaDB. 
-Respond **ONLY** with a valid MariaDB statement (no explanations, no comments). 
-User instruction (in Romanian): ""{userPrompt}""
-";
+                        You are an assistant that generates valid SQL for MariaDB. 
+                        Respond **ONLY** with a valid MariaDB statement (no explanations, no comments). 
+                        User instruction (in Romanian): ""{userPrompt}""
+                        ";
 
             string generatedSql;
             try
@@ -61,7 +61,7 @@ User instruction (in Romanian): ""{userPrompt}""
                 return RedirectToAction("Index");
             }
 
-            // 2) Execută comanda SQL generată (cu validare minimă)
+            // 2) Execută comanda SQL generată
             bool success = false;
             string executionError = null;
             try

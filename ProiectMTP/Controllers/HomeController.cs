@@ -17,10 +17,7 @@ namespace ProiectMTP.Controllers
             _configuration = configuration;
             _logger = logger;
         }
-
-        // =====================================
-        //            ACTION: Index
-        // =====================================
+        
         public IActionResult Index()
         {
             if (!User.Identity.IsAuthenticated)
@@ -44,13 +41,9 @@ namespace ProiectMTP.Controllers
                 }
             }
 
-            // Trimitem lista de tabele în view
             return View(tables);
         }
-
-        // =====================================
-        //          ACTION: CreateTable
-        // =====================================
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CreateTable(string tableName)
@@ -68,7 +61,6 @@ namespace ProiectMTP.Controllers
                 using (var connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
-                    // Creăm tabela doar cu coloana Id
                     string sqlCreate = $@"
                         CREATE TABLE `{tableName}` (
                             Id INT PRIMARY KEY AUTO_INCREMENT
@@ -87,14 +79,9 @@ namespace ProiectMTP.Controllers
                 TempData["Error"] = $"Eroare la crearea tabelului: {ex.Message}";
                 return RedirectToAction("Index");
             }
-
-            // După creare, redirecționăm către EditTable ca să introduci coloanele
             return RedirectToAction("EditTable", new { tableName = tableName });
         }
-
-        // =====================================
-        //          ACTION: DropTable
-        // =====================================
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult DropTable(string tableName)
@@ -127,10 +114,7 @@ namespace ProiectMTP.Controllers
 
             return RedirectToAction("Index");
         }
-
-        // =====================================
-        //         ACTION: EditTable
-        // =====================================
+        
         public IActionResult EditTable(string tableName)
         {
             if (string.IsNullOrWhiteSpace(tableName))
@@ -143,7 +127,6 @@ namespace ProiectMTP.Controllers
             {
                 conn.Open();
 
-                // Preluăm schema completă (Field + Type) pentru a afișa în view
                 using (var colCmd = new MySqlCommand($"SHOW COLUMNS FROM `{tableName}`;", conn))
                 using (var colReader = colCmd.ExecuteReader())
                 {
@@ -163,11 +146,7 @@ namespace ProiectMTP.Controllers
             ViewBag.TableName = tableName;
             return View(columnsWithTypes);
         }
-
-        // =====================================
-        //         ACTION: AddColumn
-        //      (rămâne neschimbată – vezi anterior)
-        // =====================================
+        
         [HttpPost]
         public IActionResult AddColumn(string tableName, string columnName, string columnType)
         {
@@ -177,7 +156,6 @@ namespace ProiectMTP.Controllers
                 return RedirectToAction("EditTable", new { tableName });
             }
 
-            // Exemplu de validare suplimentară
             var allowedTypes = new[]
             {
                 "INT", "BIGINT", "VARCHAR(50)", "VARCHAR(100)", "TEXT",
@@ -211,10 +189,6 @@ namespace ProiectMTP.Controllers
             return RedirectToAction("EditTable", new { tableName });
         }
 
-        // =====================================
-        //       ACTION: DeleteColumn
-        //      (rămâne neschimbată)
-        // =====================================
         [HttpPost]
         public IActionResult DeleteColumn(string tableName, string columnName)
         {
@@ -233,10 +207,6 @@ namespace ProiectMTP.Controllers
             return RedirectToAction("EditTable", new { tableName });
         }
 
-        // =====================================
-        //     ACTION: RenameColumn
-        //      (rămâne neschimbată)
-        // =====================================
         [HttpPost]
         public IActionResult RenameColumn(string tableName, string oldColumnName, string newColumnName, string newColumnType)
         {
